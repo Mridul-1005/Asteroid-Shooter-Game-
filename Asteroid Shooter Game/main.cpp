@@ -274,3 +274,157 @@ int main()
               }
         }
 
+    if (Keyboard::isKeyPressed(Keyboard::Right)) p->angle+=3;
+    if (Keyboard::isKeyPressed(Keyboard::Left))  p->angle-=3;
+    if (Keyboard::isKeyPressed(Keyboard::Up)) p->thrust=true;
+    else p->thrust=false;
+
+
+
+    for(auto a:entities)
+     for(auto b:entities)
+    {
+      if (a->name=="asteroid" && b->name=="bullet")
+       if ( isCollide(a,b) )
+           {
+            a->life=false;
+            b->life=false;
+
+            point += 5;
+
+            Entity *e = new Entity();
+            e->settings(sExplosion,a->x,a->y);
+            e->name="explosion";
+            entities.push_back(e);
+
+
+            for(int i=0;i<2;i++)
+            {
+             if (a->R==15) continue;
+             Entity *e = new asteroid();
+             e->settings(sRock_small,a->x,a->y,rand()%360,15);
+             entities.push_back(e);
+            }
+
+           }
+
+      if (a->name=="player" && b->name=="asteroid")
+       if ( isCollide(a,b) )
+           {
+            b->life=false;
+
+            point = 0;
+            Entity *e = new Entity();
+            e->settings(sExplosion_ship,a->x,a->y);
+            e->name="explosion";
+            entities.push_back(e);
+
+            p->settings(sPlayer,W/2,H/2,0,20);
+            p->dx=0; p->dy=0;
+           }
+    }
+
+
+    if (p->thrust)  p->anim = sPlayer_go;
+    else   p->anim = sPlayer;
+
+
+    for(auto e:entities)
+     if (e->name=="explosion")
+      if (e->anim.isEnd()) e->life=0;
+
+    if (rand()%150==0)
+     {
+       asteroid *a = new asteroid();
+       a->settings(sRock, 0,rand()%H, rand()%360, 25);
+       entities.push_back(a);
+     }
+
+    for(auto i=entities.begin();i!=entities.end();)
+    {
+      Entity *e = *i;
+
+      e->update();
+      e->anim.update();
+
+      if (e->life==false) {i=entities.erase(i); delete e;}
+      else i++;
+    }
+
+
+
+   //////draw//////
+   app.draw(background);
+
+   for(auto i:entities)
+     i->draw(app);
+
+    cout<<point<<endl;
+
+    scoreboard.setString("Your Score : " + to_string(point));
+
+    app.draw( scoreboard);
+
+
+   app.display();
+
+
+    }
+
+    /*
+    // i am starting here
+
+    // Create the window
+    sf::RenderWindow window(sf::VideoMode(800, 600), "Asteroid Game");
+
+    // Create the font
+    sf::Font font;
+    if (!font.loadFromFile("FontsFree-Net-Metropolitan.ttf"))
+    {
+        std::cout << "Error loading font." << std::endl;
+        return -1;
+    }
+
+    // Create the score text
+    sf::Text scoreText("Score: ", font, 90);
+    scoreText.setFillColor(sf::Color::White);
+    scoreText.setPosition(150, 150);
+
+    // Initialize the score
+    int score = 0;
+
+    // Game loop
+    while (window.isOpen())
+    {
+        // Handle events
+        sf::Event event;
+        while (window.pollEvent(event))
+        {
+            if (event.type == sf::Event::Closed)
+            {
+                window.close();
+            }
+        }
+
+        // Update the score
+        score += 10;
+        scoreText.setString("Score: " + std::to_string(score));
+
+        // Clear the window
+        window.clear();
+
+        // Draw the score text
+        window.draw(scoreText);
+
+        // Display the window
+        app.display();
+    }
+
+
+
+    //i am stopping here
+    */
+
+    return 0;
+}
+
